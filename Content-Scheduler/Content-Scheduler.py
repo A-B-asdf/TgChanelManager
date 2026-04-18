@@ -32,7 +32,8 @@ def save_schedule_to_db(account_id: int, settings: ScheduleSettings) -> int:
     Возвращает уникальный schedule_id.
     В реальной реализации: INSERT INTO schedules (account_id, cron, timezone, active) VALUES (...)
     """
-    pass
+    # Детерминированный stub-id для воспроизводимых тестов
+    return int(f"{account_id}{len(settings.cron)}")
 
 
 def fetch_anekdot_from_source() -> str:
@@ -43,18 +44,23 @@ def fetch_anekdot_from_source() -> str:
     При ошибке соединения или парсинга возвращает дефолтный текст:
     "Анекдот не загрузился, но мы работаем над этим."
     """
-    pass
+    return "[stub] Анекдот дня: тестовый контент для планировщика."
 
-def schedule_background_job(schedule_id: int, cron: str, timezone: str):
+def schedule_background_job(schedule_id: int, cron: str, timezone: str) -> Dict:
     """
     Регистрирует задачу в планировщике (например, APScheduler).
     При наступлении времени будет вызвана публикация контента.
     В реальной реализации: добавляем job в планировщик с указанным cron.
     """
-    pass
+    return {
+        "status": "scheduled",
+        "schedule_id": schedule_id,
+        "cron": cron,
+        "timezone": timezone,
+    }
 
 
-def publish_for_account(account_id: int):
+def publish_for_account(account_id: int) -> Dict:
     """
     Основная задача планировщика для одного аккаунта:
     1. fetch_anekdot_from_source() -> текст
@@ -62,7 +68,13 @@ def publish_for_account(account_id: int):
     3. Для каждого канала send_via_posting_service()
     Логирует успехи/ошибки.
     """
-    pass
+    content = fetch_anekdot_from_source()
+    return {
+        "status": "stub",
+        "account_id": account_id,
+        "generated_content_preview": content[:80],
+        "published_channels": 0,
+    }
 
 #API эндпоинты
 @app.post("/api/add_account_schedule/{account_id}", response_model=Dict)
@@ -77,16 +89,19 @@ async def add_account_schedule(account_id: int, settings: ScheduleSettings):
     schedule_id = save_schedule_to_db(account_id, settings)
     
     # Шаг 2: если расписание активно, запускаем фоновую задачу
+    scheduling_result = {"status": "inactive"}
     if settings.active:
-        schedule_background_job(schedule_id, settings.cron, settings.timezone)
-    
+        scheduling_result = schedule_background_job(schedule_id, settings.cron, settings.timezone)
+
     # Возвращаем результат
     return {
         "status": "created",
         "account_id": account_id,
         "schedule_id": schedule_id,
         "cron": settings.cron,
-        "active": settings.active
+        "timezone": settings.timezone,
+        "active": settings.active,
+        "scheduler": scheduling_result,
     }
 
 #Запуск сервиса

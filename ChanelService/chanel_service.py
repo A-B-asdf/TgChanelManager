@@ -32,13 +32,30 @@ async def create_channel(payload: CreateChannelRequest) -> Dict[str, Any]:
 
 @app.get("/api/get_channel_info")
 async def get_channel_info() -> Dict[str, Any]:
-    return {
-        "status": "stub",
-        "action": "get_channel_info",
-        "channel": {
+    channels = [
+        {
             "channel_id": 1,
             "name": "demo-channel",
             "created_at": "2026-01-01T00:00:00Z",
+            "posts_count": 12,
+        },
+        {
+            "channel_id": 2,
+            "name": "demo-channel-2",
+            "created_at": "2026-02-10T10:30:00Z",
+            "posts_count": 3,
+        },
+    ]
+
+    return {
+        "status": "stub",
+        "action": "get_channel_info",
+        "channels": channels,
+        "statistics": {
+            "channels_count": len(channels),
+            "posts_count": sum(item["posts_count"] for item in channels),
+            "first_channel_created_at": min(item["created_at"] for item in channels),
+            "last_channel_created_at": max(item["created_at"] for item in channels),
         },
     }
 

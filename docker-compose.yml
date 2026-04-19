@@ -1,0 +1,26 @@
+services:
+  content-scheduler:
+    image: content-scheduler
+    ports:
+      - "8002:8000"
+    volumes:
+      - scheduler_data:/app/data
+    environment:
+      - SCHEDULER_DB_PATH=/app/data/scheduler.db
+      - POSTING_SERVICE_URL=http://posting-service:8001
+    restart: unless-stopped
+
+  posting-service:
+    image: posting-service
+    ports:
+      - "8003:8001"
+    volumes:
+      - posting_data:/app/data
+    environment:
+      - POSTING_DB_PATH=/app/data/posting.db
+      - TG_ADAPTER_URL=http://tg-adapter:9000
+    restart: unless-stopped
+
+volumes:
+  scheduler_data:
+  posting_data:

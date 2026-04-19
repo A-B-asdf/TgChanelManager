@@ -1,0 +1,48 @@
+services:
+  content-scheduler:
+    build:
+      context: ./Content-Scheduler
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  posting-service:
+    build:
+      context: ./PostingService
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  channel-service:
+    build:
+      context: ./ChanelService
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+
+  fulfillment-service:
+    build:
+      context: ./FulfillmentService
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+
+  tg-adapter-channel-service:
+    build:
+      context: ./TgAdapterChannelService
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    restart: unless-stopped
+
+  tg-adapter-posting-service:
+    build:
+      context: ./TgAdapterPostingService
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
+    restart: unless-stopped

@@ -8,6 +8,7 @@ import logging
 scheduler = BackgroundScheduler()
 scheduler.start()
 
+
 def schedule_background_job(schedule_id: int, cron: str, timezone: str, account_id: int):
     trigger = CronTrigger.from_crontab(cron, timezone=timezone)
     scheduler.add_job(
@@ -18,10 +19,18 @@ def schedule_background_job(schedule_id: int, cron: str, timezone: str, account_
         replace_existing=True
     )
 
+
+def get_channels_for_account(account_id: int) -> list[int]:
+    """
+    Stub-источник каналов для аккаунта.
+    В будущем здесь должен быть вызов Channel/Fulfillment сервиса по account_id.
+    """
+    logging.info("Using stub channel source for account_id=%s", account_id)
+    return [123, 456]
+
+
 def publish_for_account(account_id: int):
-    # Здесь должна быть логика получения списка каналов аккаунта
-    # Пока заглушка
-    channels = [123, 456]  # нужно заменить на вызов ChanelService
+    channels = get_channels_for_account(account_id)
     text = fetch_anekdot()
     for ch_id in channels:
         send_to_posting_service(ch_id, text)

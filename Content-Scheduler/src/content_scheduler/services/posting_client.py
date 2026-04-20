@@ -1,7 +1,10 @@
 import requests
 from content_scheduler.core.config import Config
 
+
 def send_to_posting_service(channel_id: int, text: str) -> dict:
+    # TODO: resilience — add timeout, validate HTTP status, handle network exceptions,
+    # and return a predictable error structure instead of raw transport failures.
     url = f"{Config.POSTING_SERVICE_URL}/api/post_msg/"
     payload = {
         "channel_id": channel_id,

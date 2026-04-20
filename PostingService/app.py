@@ -1,4 +1,9 @@
 """
+[LEGACY ENTRYPOINT]
+Этот файл не является runtime entrypoint в текущем контуре.
+Актуальный запуск: `uvicorn posting_service.main:app` из пакета `src`.
+Сохранён только как исторический reference и не должен использоваться в Docker/runtime.
+
 PostingService с БД (SQLite) для логирования отправленных сообщений.
 """
 

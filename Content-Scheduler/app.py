@@ -1,4 +1,9 @@
 """
+[LEGACY ENTRYPOINT]
+Этот файл не является runtime entrypoint в текущем контуре.
+Актуальный запуск: `uvicorn content_scheduler.main:app` из пакета `src`.
+Сохранён только как исторический reference и не должен использоваться в Docker/runtime.
+
 Content-Scheduler Service с БД (SQLite) для хранения расписаний.
 """
 

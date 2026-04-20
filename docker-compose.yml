@@ -1,8 +1,10 @@
 services:
   content-scheduler:
-    image: content-scheduler
+    build:
+      context: ./Content-Scheduler
+      dockerfile: Dockerfile
     ports:
-      - "8002:8000"
+      - "8000:8000"
     volumes:
       - scheduler_data:/app/data
     environment:
@@ -11,14 +13,24 @@ services:
     restart: unless-stopped
 
   posting-service:
-    image: posting-service
+    build:
+      context: ./PostingService
+      dockerfile: Dockerfile
     ports:
-      - "8003:8001"
+      - "8001:8001"
     volumes:
       - posting_data:/app/data
     environment:
       - POSTING_DB_PATH=/app/data/posting.db
-      - TG_ADAPTER_URL=http://tg-adapter:9000
+      - TG_ADAPTER_URL=http://tg-adapter-posting-service:8005
+    restart: unless-stopped
+
+  tg-adapter-posting-service:
+    build:
+      context: ./old_implementation/TgAdapterPostingService
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
     restart: unless-stopped
 
 volumes:

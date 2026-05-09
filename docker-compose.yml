@@ -1,0 +1,128 @@
+services:
+  content-scheduler:
+    build: ./content-scheduler
+    image: tg-channel-manager-content-scheduler
+    ports:
+      - "8000:8000"
+    volumes:
+      - scheduler_data:/app/data
+    environment:
+      - SCHEDULER_DB_PATH=/app/data/scheduler.db
+      - POSTING_SERVICE_URL=http://posting-service:8001
+      - FULFILLMENT_SERVICE_URL=http://fulfillment-service:8003
+    restart: unless-stopped
+    depends_on:
+      - posting-service
+      - fulfillment-service
+
+  posting-service:
+    build: ./posting-service
+    image: tg-channel-manager-posting-service
+    ports:
+      - "8001:8001"
+    volumes:
+      - posting_data:/app/data
+    environment:
+      - POSTING_DB_PATH=/app/data/posting.db
+      - TG_ADAPTER_POSTING_URL=http://tg-adapter-posting:8005
+    restart: unless-stopped
+    depends_on:
+      - tg-adapter-posting
+
+  tg-adapter-posting:
+    build: ./tg-adapter-posting
+    image: tg-channel-manager-tg-adapter-posting
+    ports:
+      - "8005:8005"
+    environment:
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_POSTING_ACCOUNT_PHONE=${TELEGRAM_POSTING_ACCOUNT_PHONE:-${TELEGRAM_CHANNEL_ACCOUNT_PHONE}}
+      - TELEGRAM_CHANNEL_ACCOUNT_PHONE=${TELEGRAM_CHANNEL_ACCOUNT_PHONE}
+      - TELEGRAM_SESSION_FILE=/app/sessions/posting.session
+      - PROXY_URL=${PROXY_URL:-}
+      - PROXY_USER=${PROXY_USER:-}
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-}
+      - HTTP_PROXY=${PROXY_URL:-}
+      - HTTPS_PROXY=${PROXY_URL:-}
+      - ALL_PROXY=${PROXY_URL:-}
+      - NO_PROXY=localhost,127.0.0.1,content-scheduler,posting-service,fulfillment-service,channel-service,tg-adapter-channel,tg-adapter-posting
+    volumes:
+      - telegram_sessions:/app/sessions
+    restart: unless-stopped
+
+  tg-adapter-channel:
+    build: ./tg-adapter-channel
+    image: tg-channel-manager-tg-adapter-channel
+    ports:
+      - "8006:8006"
+    environment:
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_CHANNEL_ACCOUNT_PHONE=${TELEGRAM_CHANNEL_ACCOUNT_PHONE}
+      - TELEGRAM_SESSION_FILE=/app/sessions/channel.session
+      - PROXY_URL=${PROXY_URL:-}
+      - PROXY_USER=${PROXY_USER:-}
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-}
+      - HTTP_PROXY=${PROXY_URL:-}
+      - HTTPS_PROXY=${PROXY_URL:-}
+      - ALL_PROXY=${PROXY_URL:-}
+      - NO_PROXY=localhost,127.0.0.1,content-scheduler,posting-service,fulfillment-service,channel-service,tg-adapter-channel,tg-adapter-posting
+    volumes:
+      - telegram_sessions:/app/sessions
+    restart: unless-stopped
+
+  channel-service:
+    build: ./channel-service
+    image: tg-channel-manager-channel-service
+    ports:
+      - "8004:8004"
+    volumes:
+      - channel_data:/app/data
+    environment:
+      - CHANNEL_DB_PATH=/app/data/channel.db
+      - TG_ADAPTER_CHANNEL_URL=http://tg-adapter-channel:8006
+    restart: unless-stopped
+    depends_on:
+      - tg-adapter-channel
+
+  fulfillment-service:
+    build: ./fulfillment-service
+    image: tg-channel-manager-fulfillment-service
+    ports:
+      - "8003:8003"
+    volumes:
+      - fulfillment_data:/app/data
+    environment:
+      - FULFILLMENT_DB_PATH=/app/data/fulfillment.db
+      - CHANNEL_SERVICE_URL=http://channel-service:8004
+      - CONTENT_SCHEDULER_URL=http://content-scheduler:8000
+    restart: unless-stopped
+    depends_on:
+      - channel-service
+
+  ui-bot:
+    build: ./ui-bot
+    image: tg-channel-manager-ui-bot
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - FULFILLMENT_SERVICE_URL=http://fulfillment-service:8003
+      - CONTENT_SCHEDULER_URL=http://content-scheduler:8000
+      - DEFAULT_TIMEZONE=${DEFAULT_TIMEZONE:-Europe/Moscow}
+      - PROXY_URL=${PROXY_URL:-}
+      - PROXY_USER=${PROXY_USER:-}
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-}
+      - HTTP_PROXY=${PROXY_URL:-}
+      - HTTPS_PROXY=${PROXY_URL:-}
+      - NO_PROXY=localhost,127.0.0.1,fulfillment-service,content-scheduler
+    restart: unless-stopped
+    depends_on:
+      - fulfillment-service
+      - content-scheduler
+
+volumes:
+  scheduler_data:
+  posting_data:
+  telegram_sessions:
+  channel_data:
+  fulfillment_data:

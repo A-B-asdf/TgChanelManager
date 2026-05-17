@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def get_channels_by_account(account_id: int) -> List[Dict]:
     url = f"{Config.FULFILLMENT_SERVICE_URL}/api/get_all_channel"
     try:
-        response = requests.get(url, params={"account_id": account_id}, timeout=10)
+        response = requests.get(url, params={"account_id": account_id, "only_available": True}, timeout=10)
         response.raise_for_status()
         data = response.json()
         channels = data.get("items", [])
@@ -24,6 +24,7 @@ def get_channels_by_account(account_id: int) -> List[Dict]:
                 "channel_id": int(tg_channel_id),
                 "access_hash": int(ch["tg_access_hash"]) if ch.get("tg_access_hash") is not None else None,
                 "title": ch.get("title"),
+                "content_type": ch.get("content_type") or "jokes",
             })
         return result
     except Exception as exc:

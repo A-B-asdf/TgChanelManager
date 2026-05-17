@@ -43,6 +43,12 @@ def get_channel_info_from_db(channel_id: int) -> Optional[Dict]:
         return dict(row) if row else None
 
 
+def delete_channel_record(channel_id: int) -> bool:
+    with sqlite3.connect(Config.DB_PATH) as conn:
+        cur = conn.execute("DELETE FROM channels WHERE id = ?", (channel_id,))
+        return cur.rowcount > 0
+
+
 def update_channel_owner(channel_id: int, new_owner_id: int):
     with sqlite3.connect(Config.DB_PATH) as conn:
         conn.execute("UPDATE channels SET owner_account_id = ? WHERE id = ?", (new_owner_id, channel_id))

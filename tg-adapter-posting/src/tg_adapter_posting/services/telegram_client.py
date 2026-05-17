@@ -54,9 +54,26 @@ async def _resolve_channel_entity(client_g, channel_id: int, access_hash: Option
     return await client_g.get_input_entity(channel_id)
 
 
-async def send_telegram_message(channel_id: int, text: str, parse_mode: str, access_hash: Optional[int] = None) -> int:
+async def send_telegram_message(
+    channel_id: int,
+    text: str,
+    parse_mode: str,
+    access_hash: Optional[int] = None,
+    media_url: Optional[str] = None,
+) -> int:
     client_g = await get_client()
     entity = await _resolve_channel_entity(client_g, channel_id, access_hash)
+    if media_url:
+        try:
+            result = await client_g.send_file(entity, file=media_url, caption=text or None, parse_mode=parse_mode)
+            return int(result.id)
+        except Exception:
+            # Fallback: send as a regular message with a preview/link if Telegram could not upload the media URL.
+            fallback_text = text or ""
+            if media_url and media_url not in fallback_text:
+                fallback_text = (fallback_text + "\n\n" + media_url).strip()
+            result = await client_g.send_message(entity, fallback_text, parse_mode=parse_mode)
+            return int(result.id)
     result = await client_g.send_message(entity, text, parse_mode=parse_mode)
     return int(result.id)
 

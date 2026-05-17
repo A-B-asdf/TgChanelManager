@@ -10,6 +10,7 @@ class PostMessageRequest(BaseModel):
     access_hash: Optional[int] = None
     text: str
     parse_mode: str = "HTML"
+    media_url: Optional[str] = None
 
 class ChangeMessageRequest(BaseModel):
     new_text: str
@@ -19,7 +20,7 @@ class ChangeMessageRequest(BaseModel):
 @router.post("/api/post_msg/")
 async def post_message(req: PostMessageRequest):
     try:
-        msg_id = await send_telegram_message(req.channel_id, req.text, req.parse_mode, req.access_hash)
+        msg_id = await send_telegram_message(req.channel_id, req.text, req.parse_mode, req.access_hash, req.media_url)
         return {"status": "sent", "message_id": msg_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

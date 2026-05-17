@@ -6,6 +6,7 @@ class PostMessageRequest(BaseModel):
     access_hash: Optional[int] = None
     text: str
     parse_mode: Optional[str] = "HTML"
+    media_url: Optional[str] = None
 
 class ChangeMessageRequest(BaseModel):
     new_text: str

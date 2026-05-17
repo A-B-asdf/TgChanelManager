@@ -9,7 +9,7 @@ router = APIRouter()
 @router.post("/api/post_msg/")
 async def post_message(request: PostMessageRequest):
     try:
-        return send_message(request.channel_id, request.text, request.parse_mode or "HTML", request.access_hash)
+        return send_message(request.channel_id, request.text, request.parse_mode or "HTML", request.access_hash, request.media_url)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
